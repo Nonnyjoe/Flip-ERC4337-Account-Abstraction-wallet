@@ -131,7 +131,7 @@ export function CreateCertificate() {
                         />
                     </div>
                     <div className='flex flex-col gap-2'>
-                        <label htmlFor="salt">Account Passcode</label>
+                        <label htmlFor="salt">Wallet Passcode</label>
                         <input
                             type="number"
                             name="salt"
