@@ -1,0 +1,13 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+
+remappings = [
+    "@openzeppelin/=lib/openzeppelin-contracts/",
+    "@uniswap/v3-periphery/=lib/v3-periphery",
+    "@uniswap/v3-core/=lib/v3-core",
+    "@gnosis.pm/safe-contracts/=lib/safe-contracts",
+]
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
