@@ -4,18 +4,38 @@ import factory_abi from '../utils/factory_abi.json';
 import factory_address from '../utils/factory_address';
 
 
-import React, { useEffect, useState } from 'react';
+import React, { Provider, useEffect, useState } from 'react';
 
 import { clsx } from 'clsx';
 import { Address, useContractReads, useAccount, useContractRead, useContractWrite, useWaitForTransaction, usePrepareContractWrite } from 'wagmi';
 import { Button } from './ui/button';
-import { ethers } from 'ethers';
+
+// const { RelayClient } = require('@openzeppelin/defender-sdk-relay-client');
+import { RelayClient } from '@openzeppelin/defender-relay-client';
+// const { DefenderRelayProvider } = require('@openzeppelin/defender-relay-client/lib/web3');
+const Web3 = require('web3');
+import Lambda from 'aws-sdk/clients/lambda';
+
+// import { Defender } from '@openzeppelin/defender-sdk-base-client';
+// import { sigUtil } from "eth-sigiutil"
+import { IBundler, Bundler } from '@biconomy/bundler'
+import { BiconomySmartAccountV2, DEFAULT_ENTRYPOINT_ADDRESS } from "@biconomy/account"
+import { ethers  } from 'ethers'
+import { ChainId } from "@biconomy/core-types"
+import { 
+  IPaymaster, 
+  BiconomyPaymaster,
+  IHybridPaymaster,  
+  PaymasterMode,
+  SponsorUserOperationDto,
+} from '@biconomy/paymaster'
+import { ECDSAOwnershipValidationModule, DEFAULT_ECDSA_OWNERSHIP_MODULE } from "@biconomy/modules";
+
 // import { Button } from 'react-day-picker';
 
 
 export function IssueCertificate() {
 
-    const [contractAddress, setUserName] = useState('');
     const [balance, setBalance] = useState<number>(0);
     const [nonce, setNonce] = useState<number>(0);
     const [owner, setOwner] = useState('');
@@ -31,27 +51,189 @@ export function IssueCertificate() {
     const [withdrawalAddress, setWithdrawalAddresss] = useState("");
     const [withdrawalAmount, setWithdrawalAmount] = useState(0);
     const [WithdrawalStatus, setWithdrawalStatus] = useState<Boolean>(false);
-    // const [userAddress, setUserAddress] = useState('');
-    // const [duration, setDuration] = useState(0);
-    // const [duration, setDuration] = useState(0);
-    const [tokenAmount, setTokenAmount] = useState(0);
     const [singleAccount, setSingleAccount] = useState("");
     const [connectedAddr, setConnectedAddr] = useState("");
     const { address } = useAccount();
 
+    // const [address, setAddress] = useState<string>("")
+    const [loading, setLoading] = useState<boolean>(false);
+    const [smartAccount, setSmartAccount] = useState<BiconomySmartAccountV2 | null>(null);
+    const [provider, setProvider] = useState<ethers.providers.Provider | null>(null)
 
-    const IssueCert = async () => {
-        console.log("creating vest");
-        issueCertWrite?.();
-    };
-    const IssueCert2 = async () => {
-        console.log("creating vest");
-        issueCertWrite2?.();
-    };
-    const IssueCert3 = async () => {
-        console.log("creating vest3333");
-        issueCertWrite3?.();
-    };
+const bundler: IBundler = new Bundler({
+    bundlerUrl: `https://bundler.biconomy.io/api/v2/${ChainId.GOERLI}/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`, // bundler URL from dashboard use 84531 as chain id if you are following this on base goerli,    
+    chainId: ChainId.GOERLI,
+    entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+  })
+  
+  const paymaster: IPaymaster = new BiconomyPaymaster({
+    paymasterUrl: "https://paymaster.biconomy.io/api/v1/5/peE1TtqEY.5ce39aaf-609a-41db-b29a-e99fc4269131",// paymaster url from dashboard 
+  })
+
+  interface Props {
+    smartAccount: BiconomySmartAccountV2,
+    address: string,
+    provider: ethers.providers.Provider,
+  }
+  
+
+const sendTransction = async(ContractAddress: Address, ContractAbi: any) => {
+    await connect();
+    console.log('smartAccount:', smartAccount);
+    // Create a provider instance for the Ethereum mainnet
+    const provider: ethers.providers.Provider = new ethers.providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/rcEZZsvGLLljGJU9GAWZGnRMSXQOuGsw');
+    // Initialize contract
+    let contract = new ethers.Contract(ContractAddress, ContractAbi, provider);
+    try{
+        const transact = await contract.populateTransaction.withdrawDepositTo(withdrawalAddress, ethers.utils.parseEther(withdrawalAmount.toString()));
+        console.log(transact.data);
+        const tx = {
+            to: ContractAddress,
+            data: transact.data,
+        };
+        console.log("Addr:", ContractAddress);
+        console.log("Tx:", tx);
+
+        let userOp = await smartAccount.buildUserOp([tx]);
+        console.log("userOp:", userOp);
+        const biconomyPaymaster = smartAccount?.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
+        let paymasterServiceData: SponsorUserOperationDto = {
+            mode: PaymasterMode.SPONSORED,
+            smartAccountInfo: {
+            name: 'Smart Wallet',
+            version: '1.1.0'
+        },
+        }
+        
+        const paymasterAndDataResponse =
+        await biconomyPaymaster.getPaymasterAndData(
+          userOp,
+          paymasterServiceData
+        );
+
+        userOp ? userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData : null;
+        const userOpResponse = await smartAccount?.sendUserOp(userOp);
+        console.log("userOpHash", userOpResponse);
+        const  receipt  = await userOpResponse?.wait(1);
+        console.log("txHash", receipt)
+    } catch(err: any) {
+        console.log(err);
+        console.log(err);
+    }
+}
+
+const zeppelin = async () => {
+    let YOUR_RELAYER_API_KEY = "8Mxv2gVPhn5tNtgyiYsqmhnYLW3VHrM9";
+    let YOUR_RELAYER_API_SECRET = "3fNkhQuUNyLdVPpFSnXH5N7kzxWsHSFR6oJyrErLBnfFtxunecuw5sPjQxj6Mdzt";
+    
+    const credentials = { apiKey: YOUR_RELAYER_API_KEY, apiSecret: YOUR_RELAYER_API_SECRET };
+    const relayClient = new RelayClient(credentials);
+
+    console.log(`creating relayers........`);
+    const requestParameters = {
+        name: 'MyNewRelayer',
+        network: 'goerli',
+        minBalance: BigInt(1e17).toString(),
+        policies: {
+          whitelistReceivers: ['0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B'],
+        },
+      };
+      
+      await relayClient.create(requestParameters);
+      
+    console.log(`checking relayers........`)
+    // const provider = new DefenderRelayProvider(credentials, { speed: 'fast' });
+   
+   
+   
+    const allRelayers = await relayClient.list();
+    console.log(allRelayers)
+    
+    // const client = new RelayClient(credentials);
+    // const client = new DefenderRelayProvider(credentials);
+    // console.log(client);
+    // const provider = client.relaySigner.getProvider();
+
+    // const web3 = new Web3(provider);
+
+    // const [from] = await web3.eth.getAccounts();
+    // console.log(from);
+}
+
+
+
+const connect = async () => {
+
+    const data1 = 'Hello12,';
+    const data2 = 'world2!';
+    // Predefined randomness (not secure - for demonstration only)
+    // Obtained by combining a username and a password through encodeing.
+    const encodedData = ethers.utils.defaultAbiCoder.encode(['string', 'string'], [data1, data2]);
+    // console.log(encodedData);
+
+    // hashing the encoded data to obtain the data in order to get an entropy from wich to obtain the Mnemonic
+    const hash = ethers.utils.keccak256(encodedData);
+    // console.log(hash);
+
+    // Generate a mnemonic phrase from the predefined randomness
+    const mnemonic = ethers.utils.entropyToMnemonic(hash);
+    // console.log("Mnemonic:", mnemonic);
+
+    // Create a wallet from the seed phrase
+    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+    console.log(wallet);
+    const provider: ethers.providers.Provider = new ethers.providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/rcEZZsvGLLljGJU9GAWZGnRMSXQOuGsw');
+
+    // Get a signer from the wallet
+    const signer = wallet.connect(provider);
+
+    const module1 = await ECDSAOwnershipValidationModule.create({
+        signer: signer,
+        moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE
+        });
+
+
+        let biconomySmartAccount = await BiconomySmartAccountV2.create({
+            chainId: ChainId.POLYGON_MUMBAI,
+            bundler: bundler, 
+            paymaster: paymaster,
+            entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+            defaultValidationModule: module,
+            activeValidationModule: module
+          })
+
+        //   setAddress( await biconomySmartAccount.getAccountAddress())
+          setSmartAccount(biconomySmartAccount);
+          console.log('done here');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+const IssueCert = async () => {
+    console.log("creating vest");
+    issueCertWrite?.();
+};
+const IssueCert2 = async () => {
+    console.log("creating vest");
+    issueCertWrite2?.();
+};
+const IssueCert3 = async () => {
+    console.log("creating vest3333");
+    // sendTransction(singleAccount as Address, child_abi);
+    zeppelin();
+    // issueCertWrite3?.();
+};
+
 
     // EXECUTE TRANSACTION
     const { config: IssueCertConfig } = usePrepareContractWrite({
@@ -74,7 +256,7 @@ export function IssueCertificate() {
         address: singleAccount as Address,
         abi: child_abi,
         functionName: "addDeposit",
-        value: ethers.parseEther(depositValue.toString()),
+        value: ethers.utils.parseEther(depositValue.toString()) as any,
     });
     const { data: issueCertData2, isLoading: issueCertIsLoading2, isError: issueCertIsError2, write: issueCertWrite2, isSuccess: Successfully2 } = useContractWrite(IssueCertConfig2);
     const waitForTransaction2 = useWaitForTransaction({
@@ -90,7 +272,7 @@ export function IssueCertificate() {
         address: singleAccount as Address,
         abi: child_abi,
         functionName: "withdrawDepositTo",
-        args: [withdrawalAddress, ethers.parseEther(withdrawalAmount.toString())],
+        args: [withdrawalAddress, ethers.utils.parseEther(withdrawalAmount.toString())],
     });
     const { data: issueCertData3, isLoading: issueCertIsLoading3, isError: issueCertIsError3, write: issueCertWrite3, isSuccess: Successfully3 } = useContractWrite(IssueCertConfig3);
     const waitForTransaction3 = useWaitForTransaction({

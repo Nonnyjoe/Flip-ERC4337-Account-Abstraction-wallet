@@ -1,3 +1,3 @@
-const factory_address = "0x7410472D991De37BD8aAF4509db7aC188C161eEe";
+const factory_address = "0xE8c34E90E0B1920685313679b661Ed933878D2CE";
 
 export default factory_address;
