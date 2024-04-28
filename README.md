@@ -1,4 +1,4 @@
-# ERC-4337 ACCOUNT ABSTRACTION WALLET DAPP
+# FLIP WALLET ERC-4337 ACCOUNT ABSTRACTION DAPP
 
 This Solidity program is a full stack "Account Abstraction Wallet" program that impliments the factory contract model to allow individuals create a personalized and recoverable account abstraction wallet.
 
@@ -14,22 +14,23 @@ https://erc-4337-account-abstraction-wallet.vercel.app/
 ## Executing program
 #### STEP 1
 - CREATE A WALLET.
-<img src="./images/Screenshot_20230922_123823.png" alt="Nonnyjoe" />
+<img src="./images/Screenshot 2024-04-28 at 11.28.01 PM" alt="Nonnyjoe" />
+<img src="./images/Screenshot 2024-04-28 at 11.23.55 PM" alt="Nonnyjoe" />
 
 #### STEP 2
 - TRANSACT USING YOUR WALLET (TRANSFER, DEPOSIT, EXECUTE OPERATION).
-<img src="./images/Screenshot_20230922_124315.png" alt="Nonnyjoe" />
-<img src="./images/Screenshot_20230922_124516.png" alt="Nonnyjoe" />
+<img src="./images/Screenshot 2024-04-28 at 11.24.14 PM" alt="Nonnyjoe" />
+<img src="./images/Screenshot 2024-04-28 at 11.24.40 PM" alt="Nonnyjoe" />
 
 
 #### STEP 3
 - REQUEST FOR ACCOUNT RECOVERY / AUTHORIZE RECOVERY
-<img src="./images/Screenshot_20230922_124439.png" alt="Nonnyjoe" />
+<img src="./images/Screenshot 2024-04-28 at 11.25.03 PM" alt="Nonnyjoe" />
 
 ## Authors
 
 Idogwu Chinonso
-[@metacraftersio](https://twitter.com/ChinonsoIdogwu)
+[@scrollHacker](https://twitter.com/ChinonsoIdogwu)
 
 
 ## License
