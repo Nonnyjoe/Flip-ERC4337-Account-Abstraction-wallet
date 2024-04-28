@@ -2,6 +2,7 @@ import { Container } from '../components/Container';
 import child_abi from '../utils/child_abi.json';
 import factory_abi from '../utils/factory_abi.json';
 import factory_address from '../utils/factory_address';
+import { UserOperation, Transaction } from "@biconomy/core-types";
 
 
 import React, { Provider, useEffect, useState } from 'react';
@@ -78,7 +79,7 @@ const bundler: IBundler = new Bundler({
   
 
 const sendTransction = async(ContractAddress: Address, ContractAbi: any) => {
-    await connect();
+    // await connect();
     console.log('smartAccount:', smartAccount);
     // Create a provider instance for the Ethereum mainnet
     const provider: ethers.providers.Provider = new ethers.providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/rcEZZsvGLLljGJU9GAWZGnRMSXQOuGsw');
@@ -94,7 +95,7 @@ const sendTransction = async(ContractAddress: Address, ContractAbi: any) => {
         console.log("Addr:", ContractAddress);
         console.log("Tx:", tx);
 
-        let userOp = await smartAccount.buildUserOp([tx]);
+        let userOp = await smartAccount?.buildUserOp([tx]);
         console.log("userOp:", userOp);
         const biconomyPaymaster = smartAccount?.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
         let paymasterServiceData: SponsorUserOperationDto = {
@@ -107,12 +108,12 @@ const sendTransction = async(ContractAddress: Address, ContractAbi: any) => {
         
         const paymasterAndDataResponse =
         await biconomyPaymaster.getPaymasterAndData(
-          userOp,
+          userOp as Partial<UserOperation>,
           paymasterServiceData
         );
 
         userOp ? userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData : null;
-        const userOpResponse = await smartAccount?.sendUserOp(userOp);
+        const userOpResponse = await smartAccount?.sendUserOp(userOp as Partial<UserOperation>);
         console.log("userOpHash", userOpResponse);
         const  receipt  = await userOpResponse?.wait(1);
         console.log("txHash", receipt)
@@ -123,31 +124,31 @@ const sendTransction = async(ContractAddress: Address, ContractAbi: any) => {
 }
 
 const zeppelin = async () => {
-    let YOUR_RELAYER_API_KEY = "8Mxv2gVPhn5tNtgyiYsqmhnYLW3VHrM9";
-    let YOUR_RELAYER_API_SECRET = "3fNkhQuUNyLdVPpFSnXH5N7kzxWsHSFR6oJyrErLBnfFtxunecuw5sPjQxj6Mdzt";
+    // let YOUR_RELAYER_API_KEY = "8Mxv2gVPhn5tNtgyiYsqmhnYLW3VHrM9";
+    // let YOUR_RELAYER_API_SECRET = "3fNkhQuUNyLdVPpFSnXH5N7kzxWsHSFR6oJyrErLBnfFtxunecuw5sPjQxj6Mdzt";
     
-    const credentials = { apiKey: YOUR_RELAYER_API_KEY, apiSecret: YOUR_RELAYER_API_SECRET };
-    const relayClient = new RelayClient(credentials);
+    // const credentials = { apiKey: YOUR_RELAYER_API_KEY, apiSecret: YOUR_RELAYER_API_SECRET };
+    // const relayClient = new RelayClient(credentials);
 
-    console.log(`creating relayers........`);
-    const requestParameters = {
-        name: 'MyNewRelayer',
-        network: 'goerli',
-        minBalance: BigInt(1e17).toString(),
-        policies: {
-          whitelistReceivers: ['0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B'],
-        },
-      };
+    // console.log(`creating relayers........`);
+    // const requestParameters = {
+    //     name: 'MyNewRelayer',
+    //     network: 'goerli',
+    //     minBalance: BigInt(1e17).toString(),
+    //     policies: {
+    //       whitelistReceivers: ['0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B'],
+    //     },
+    //   };
       
-      await relayClient.create(requestParameters);
+    //   await relayClient.create(requestParameters);
       
-    console.log(`checking relayers........`)
-    // const provider = new DefenderRelayProvider(credentials, { speed: 'fast' });
+    // console.log(`checking relayers........`)
+    // // const provider = new DefenderRelayProvider(credentials, { speed: 'fast' });
    
    
    
-    const allRelayers = await relayClient.list();
-    console.log(allRelayers)
+    // const allRelayers = await relayClient.list();
+    // console.log(allRelayers)
     
     // const client = new RelayClient(credentials);
     // const client = new DefenderRelayProvider(credentials);
@@ -162,50 +163,50 @@ const zeppelin = async () => {
 
 
 
-const connect = async () => {
+// const connect = async () => {
 
-    const data1 = 'Hello12,';
-    const data2 = 'world2!';
-    // Predefined randomness (not secure - for demonstration only)
-    // Obtained by combining a username and a password through encodeing.
-    const encodedData = ethers.utils.defaultAbiCoder.encode(['string', 'string'], [data1, data2]);
-    // console.log(encodedData);
+//     const data1 = 'Hello12,';
+//     const data2 = 'world2!';
+//     // Predefined randomness (not secure - for demonstration only)
+//     // Obtained by combining a username and a password through encodeing.
+//     const encodedData = ethers.utils.defaultAbiCoder.encode(['string', 'string'], [data1, data2]);
+//     // console.log(encodedData);
 
-    // hashing the encoded data to obtain the data in order to get an entropy from wich to obtain the Mnemonic
-    const hash = ethers.utils.keccak256(encodedData);
-    // console.log(hash);
+//     // hashing the encoded data to obtain the data in order to get an entropy from wich to obtain the Mnemonic
+//     const hash = ethers.utils.keccak256(encodedData);
+//     // console.log(hash);
 
-    // Generate a mnemonic phrase from the predefined randomness
-    const mnemonic = ethers.utils.entropyToMnemonic(hash);
-    // console.log("Mnemonic:", mnemonic);
+//     // Generate a mnemonic phrase from the predefined randomness
+//     const mnemonic = ethers.utils.entropyToMnemonic(hash);
+//     // console.log("Mnemonic:", mnemonic);
 
-    // Create a wallet from the seed phrase
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-    console.log(wallet);
-    const provider: ethers.providers.Provider = new ethers.providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/rcEZZsvGLLljGJU9GAWZGnRMSXQOuGsw');
+//     // Create a wallet from the seed phrase
+//     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+//     console.log(wallet);
+//     const provider: ethers.providers.Provider = new ethers.providers.JsonRpcProvider('https://eth-goerli.g.alchemy.com/v2/rcEZZsvGLLljGJU9GAWZGnRMSXQOuGsw');
 
-    // Get a signer from the wallet
-    const signer = wallet.connect(provider);
+//     // Get a signer from the wallet
+//     const signer = wallet.connect(provider);
 
-    const module1 = await ECDSAOwnershipValidationModule.create({
-        signer: signer,
-        moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE
-        });
+//     const module1 = await ECDSAOwnershipValidationModule.create({
+//         signer: signer,
+//         moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE
+//         });
 
 
-        let biconomySmartAccount = await BiconomySmartAccountV2.create({
-            chainId: ChainId.POLYGON_MUMBAI,
-            bundler: bundler, 
-            paymaster: paymaster,
-            entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
-            defaultValidationModule: module,
-            activeValidationModule: module
-          })
+//         let biconomySmartAccount = await BiconomySmartAccountV2.create({
+//             chainId: ChainId.POLYGON_MUMBAI,
+//             bundler: bundler, 
+//             paymaster: paymaster,
+//             entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+//             defaultValidationModule: module,
+//             activeValidationModule: module
+//           })
 
-        //   setAddress( await biconomySmartAccount.getAccountAddress())
-          setSmartAccount(biconomySmartAccount);
-          console.log('done here');
-}
+//         //   setAddress( await biconomySmartAccount.getAccountAddress())
+//           setSmartAccount(biconomySmartAccount);
+//           console.log('done here');
+// }
 
 
 
