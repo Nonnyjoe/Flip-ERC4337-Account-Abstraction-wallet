@@ -1,3 +1,5 @@
+<img src="./images/Screenshot-2024-04-28.png" alt="Nonnyjoe" />
+
 # FLIP WALLET ERC-4337 ACCOUNT ABSTRACTION DAPP
 
 This Solidity program is a full stack "Account Abstraction Wallet" program that impliments the factory contract model to allow individuals create a personalized and recoverable account abstraction wallet.
@@ -14,18 +16,18 @@ https://erc-4337-account-abstraction-wallet.vercel.app/
 ## Executing program
 #### STEP 1
 - CREATE A WALLET.
-<img src="./images/Screenshot 2024-04-28 at 11.28.01 PM" alt="Nonnyjoe" />
-<img src="./images/Screenshot 2024-04-28 at 11.23.55 PM" alt="Nonnyjoe" />
+<img src="./images/Screenshot_2024-04-28_1.png" alt="Nonnyjoe" />
+<img src="./images/Screenshot_2024-04-28_2.png" alt="Nonnyjoe" />
 
 #### STEP 2
 - TRANSACT USING YOUR WALLET (TRANSFER, DEPOSIT, EXECUTE OPERATION).
-<img src="./images/Screenshot 2024-04-28 at 11.24.14 PM" alt="Nonnyjoe" />
-<img src="./images/Screenshot 2024-04-28 at 11.24.40 PM" alt="Nonnyjoe" />
+<img src="./images/Screenshot_2024-04-28_3.png" alt="Nonnyjoe" />
+<img src="./images/Screenshot_2024-04-28_4.png" alt="Nonnyjoe" />
 
 
 #### STEP 3
 - REQUEST FOR ACCOUNT RECOVERY / AUTHORIZE RECOVERY
-<img src="./images/Screenshot 2024-04-28 at 11.25.03 PM" alt="Nonnyjoe" />
+<img src="./images/Screenshot_2024-04-28_5.png" alt="Nonnyjoe" />
 
 ## Authors
 
