@@ -142,7 +142,7 @@ export function VerifyCertificate() {
         <Container className="pt-20 pb-16 lg:pt-10">
             <form className={clsx("flex flex-col gap-8 mt-4 px-8 py-8 m-auto bg-zinc-50 shadow-2xl shadow-zinc-200 rounded-lg ring-1 ring-zinc-200 lg:max-w-2xl")}>
                 <h2 className="mx-auto max-w-4xl font-display text-4xl font-medium tracking-tight text-slate-900 ">
-                    AUTHORIE RECOVERY
+                    AUTHORIZE RECOVERY
                 </h2>
                 <div className='space-y-4'>
                     <div className='flex flex-col gap-2'>

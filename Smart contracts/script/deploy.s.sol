@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../src/accountFactory.sol";
+import "../src/ERC4337/core/EntryPoint.sol";
 
 interface ICHILD {
        function viewOwner() external view returns(address);
@@ -21,6 +22,7 @@ interface IERC20 {
 
 contract deploy is Script {
     SimpleAccountFactory _SimpleAccountFactory;
+    EntryPoint _EntryPoint;
     address _admin = payable(0xA771E1625DD4FAa2Ff0a41FA119Eb9644c9A46C8);
     address _user = payable(0xBB9F947cB5b21292DE59EFB0b1e158e90859dddb);
     address token = 0x203eef5b8ac17d3d59071b393067b64A52ADA681;
@@ -31,8 +33,8 @@ contract deploy is Script {
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-        
-        _SimpleAccountFactory = new SimpleAccountFactory(IEntryPoint(0x0576a174D229E3cFA37253523E645A78A0C91B57));
+        // _EntryPoint = new EntryPoint();
+        _SimpleAccountFactory = new SimpleAccountFactory(IEntryPoint(address(0xb097d7C672F9Ef525ED03581874cd8937d373078)));
         _child = address(_SimpleAccountFactory.createAccount(2021, recover ));
         
         //Verify owner of smart wallet
@@ -40,25 +42,25 @@ contract deploy is Script {
         console.log(owner);
 
         // Deposit into wallet
-        depositIntoWallet();
+        // depositIntoWallet();
         // transfer from wallet back to admin EOA
-        transferFromWallet();
+        // transferFromWallet();
 
         // mint tokens to smart account
-        mintTokenToSmartWallet();
+        // mintTokenToSmartWallet();
 
         // Execute transfer using Smart Wallet
-        executeTransferUsingSmartWallet();
+        // executeTransferUsingSmartWallet();
         vm.stopBroadcast();
     }
 
     function depositIntoWallet() public {
         // vm.deal(address(this), 3 ether);
-        ICHILD(_child).addDeposit{value: 0.001 ether}();
+        ICHILD(_child).addDeposit{value: 0.0003 ether}();
     }
 
     function transferFromWallet() public {
-        ICHILD(_child).withdrawDepositTo(payable(_user), 0.001 ether);
+        ICHILD(_child).withdrawDepositTo(payable(_user), 0.0001 ether);
     }
 
     function mintTokenToSmartWallet() public {

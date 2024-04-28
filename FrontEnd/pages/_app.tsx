@@ -12,13 +12,16 @@ import {
   zora,
   base,
   baseGoerli,
-  sepolia
+  sepolia,
+  scrollSepolia,
+  scrollTestnet
 } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { ChakraProvider } from '@chakra-ui/react'
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
+    scrollSepolia,
     goerli,
     sepolia,
     mainnet,
@@ -28,7 +31,7 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
     zora,
     baseGoerli,
     base,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : []),
+    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [scrollSepolia] : []),
   ],
   [publicProvider()]
 );
